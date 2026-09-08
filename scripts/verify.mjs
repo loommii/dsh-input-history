@@ -16,7 +16,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-const PKG_NAME = "@linjjj/dsh-input-history";
+const PKG_NAME = "@loommii/dsh-input-history";
 
 const { apply } = await import("../lib/index.js");
 assert.equal(typeof apply, "function", "host half must export an apply function");

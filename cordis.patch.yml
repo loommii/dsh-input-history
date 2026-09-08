@@ -1,8 +1,8 @@
 # dsh-input-history bundle patch: mounts the client plugin into the host
 # composition of a dsh profile. Installing this package
-# (`dsh plugin --profile <name> add @linjjj/dsh-input-history`) makes
+# (`dsh plugin --profile <name> add @loommii/dsh-input-history`) makes
 # dsh-client-modules discover its `dsh.client` web bundle and serve the
 # composer arrow-key history to every session of the profile.
 - insert:
     - id: input-history
-      name: '@linjjj/dsh-input-history'
+      name: '@loommii/dsh-input-history'
