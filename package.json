@@ -1,6 +1,6 @@
 {
   "name": "@loommii/dsh-input-history",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Arrow-key input history for the DeepSeek Harness Web GUI: press Up/Down at the composer boundary to recall previously sent messages, with a floating history dropdown and a /history command that opens the same panel from the slash menu. Built for the Lexical contenteditable composer (dsh >= 0.1.2-rc.1).",
   "author": "loommii",
   "keywords": [
@@ -43,9 +43,7 @@
     },
     "client": {
       "platform": "web",
-      "inject": [
-        "@deepseek-ai/dsh-client-runtime"
-      ]
+      "inject": []
     }
   },
   "scripts": {
