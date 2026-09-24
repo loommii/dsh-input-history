@@ -38,6 +38,9 @@ assert.ok(client.includes("pageAllUserMessages"), "client must read the FULL hos
 assert.ok(client.includes("onMouseEnter"), "client panel owns a single highlight model incl. hover");
 assert.ok(!client.includes("TEXTAREA"), "client must not reference the v1 textarea surface");
 assert.ok(client.includes('ctx.inject(["inputTriggers"]'), "client must register the /history source through ctx.inject(inputTriggers)");
+assert.ok(client.includes('ctx.inject(["remote", "remote.session", "conversation", "sessions"]'), "client must inject the Sessions identity service");
+assert.ok(client.includes("subagentAddress"), "client must identify direct subagent Sessions before history access");
+assert.ok(client.includes("historyAllowed"), "client must have a fail-closed history guard");
 
 const patch = await readFile(new URL("../cordis.patch.yml", import.meta.url), "utf8");
 assert.ok(patch.includes(PKG_NAME), "patch manifest must reference the package name");
@@ -46,6 +49,7 @@ assert.ok(patch.includes("- insert:"), "patch manifest must be an insert list");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 assert.equal(pkg.dsh?.bundle?.patch, "./cordis.patch.yml", "package must declare dsh.bundle.patch");
 assert.equal(pkg.dsh?.client?.platform, "web", "package must declare dsh.client.platform web");
+assert.ok(pkg.dsh?.client?.inject?.includes("@deepseek-ai/dsh-api-session-controller"), "package must request the session-controller client graph");
 assert.ok(pkg.exports?.["./client"] !== undefined, "package must export ./client");
 
 console.log(`OK: ${PKG_NAME} host half, client bundle (v3 own-panel surface), and patch manifest verified.`);

@@ -101,6 +101,28 @@ const registeredSources = [];
 const effects = [];
 const shellDraftWrites = [];
 const slashPickWrites = [];
+const remoteRequests = [];
+const sessionsService = {
+  subagentAddress(sessionId) {
+    return sessionId === "subagent-session"
+      ? { parentSessionId: "parent-session", childSessionId: sessionId, mode: "one-shot" }
+      : undefined;
+  },
+  list: {
+    getSnapshot() {
+      return {
+        phase: "ready",
+        byId: new Proxy({}, {
+          get(_target, sessionId) {
+            if (typeof sessionId !== "string") return undefined;
+            if (sessionId === "unknown-session") return undefined;
+            return { origin: sessionId === "subagent-session" ? "subagent" : undefined };
+          },
+        }),
+      };
+    },
+  },
+};
 
 const slotsService = {
   inject(key, callback) {
@@ -165,6 +187,7 @@ const ctx = {
       }));
       return {
         async *follow(request) {
+          remoteRequests.push(request);
           // Fail fast for the error-path test session (RPC failure).
           const sid = request.address && request.address.sessionId;
           if (sid === "fail-session") {
@@ -181,6 +204,7 @@ const ctx = {
           };
         },
         async page(request) {
+          remoteRequests.push(request);
           if (request.beforeSeq === undefined) return { ok: false, error: new Error("page requires an open cursor") };
           const data = pickLog(request.address && request.address.sessionId);
           const idx = data.findIndex(([seq]) => seq === request.beforeSeq);
@@ -197,6 +221,7 @@ const ctx = {
         },
       };
     }
+    if (name === "sessions") return sessionsService;
     if (name === "conversation") {
       return {
         input: {
@@ -247,6 +272,33 @@ assert.ok(!String(exportsObj).includes("popupSelect"), "no popupSelect registrat
 // Bare-enter "/history" opens our own panel (handled, not a command claim).
 const enterOutcome = await source.matchEnter({ sessionId: "s1" }, "/history", new AbortController().signal, { images: 0 });
 assert.equal(enterOutcome, "handled", "bare /history enter must be handled by our source");
+
+// ---- REGRESSION: direct subagent sessions must be fail-closed ----
+{
+  const subagentCandidates = await source.candidates({ sessionId: "subagent-session" }, { query: "hist" });
+  assert.deepEqual(subagentCandidates, [], "subagent sessions must not offer /history");
+  const Panel = registeredComponents.get("input-history-panel");
+  assert.equal(Panel({ sessionId: "subagent-session", useInput: () => ({ draft: "" }) }), null, "subagent overlay must not render history");
+  const subagentEnter = await source.matchEnter({ sessionId: "subagent-session" }, "/history", new AbortController().signal, { images: 0 });
+  assert.equal(subagentEnter, undefined, "subagent bare /history must not be handled");
+  const subagentPick = source.onPick({
+    candidate: { name: "history" },
+    session: { sessionId: "subagent-session" },
+    via: "menu",
+    span: { start: 0, end: 8 },
+  });
+  assert.equal(subagentPick, undefined, "subagent menu pick must be ignored");
+  let subagentRows = null;
+  let subagentError;
+  ihTest.loadFullHistory("subagent-session", (rows, err) => { subagentRows = rows; subagentError = err; });
+  assert.deepEqual(subagentRows, [], "subagent history loader must return no rows without querying");
+  assert.equal(subagentError, undefined, "subagent history loader must not surface a remote error");
+  assert.equal(remoteRequests.filter((entry) => entry.address?.sessionId === "subagent-session").length, 0, "subagent history must never reach remote.session");
+
+  const unknownCandidates = await source.candidates({ sessionId: "unknown-session" }, { query: "hist" });
+  assert.deepEqual(unknownCandidates, [], "unknown sessions must fail closed");
+  assert.equal(ihTest.historyAllowed("unknown-session"), false, "unknown session identity must remain closed");
+}
 
 // ---- REGRESSION: clicking ANY history row must recall THAT row (var-loop trap) ----
 // lib/client.js's row renderer used `var item` inside the loop; every row's
