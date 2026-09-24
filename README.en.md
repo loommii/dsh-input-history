@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/topics/dsh-plugin"><img alt="dsh-plugin" src="https://img.shields.io/badge/dsh-plugin-4d6bfe?style=flat&logo=deepseek&logoColor=white" /></a>
   <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-yellow.svg?style=flat" /></a>
-  <a href="https://www.npmjs.com/package/@deepseek-ai/dsh"><img alt="DSH 0.1.2-rc.1+" src="https://img.shields.io/badge/dsh-0.1.2--rc.1%2B-4d6bfe?style=flat" /></a>
+  <a href="https://www.npmjs.com/package/@deepseek-ai/dsh"><img alt="DSH 0.1.7-rc.1" src="https://img.shields.io/badge/dsh-0.1.7--rc.1-4d6bfe?style=flat" /></a>
 </p>
 
 <p align="center">
