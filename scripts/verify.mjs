@@ -30,7 +30,10 @@ assert.ok(client.includes(PKG_NAME), "client bundle must declare its module id")
 // v3 surface assertions — the contenteditable-era wiring + own-panel /history:
 assert.ok(client.includes("conversation.input.overlay"), "client must register the history dropdown overlay");
 assert.ok(client.includes("data-composer-input"), "client must target the contenteditable composer host marker");
-assert.ok(client.includes("setComposerDraft"), "client must write drafts through the conversation input shell");
+assert.ok(client.includes("setComposerDraft"), "client must write drafts through the public conversation input resolver");
+assert.ok(client.includes("input.for"), "client must use the public SessionInputResolver");
+assert.ok(!client.includes("input.shell"), "client must not depend on the legacy internal input shell");
+assert.ok(!client.includes("envelope.images"), "history must not block text recall based on the legacy attachment field");
 assert.ok(client.includes("registerSource"), "client must register an input-trigger source (own /history entry)");
 assert.ok(!client.includes("kind: \"popupSelect\""), "client must NOT open the official popupSelect shell for /history");
 assert.ok(!client.includes("commandUi.register"), "client must not register a commandUi popupSelect contribution");
@@ -47,6 +50,8 @@ assert.ok(patch.includes(PKG_NAME), "patch manifest must reference the package n
 assert.ok(patch.includes("- insert:"), "patch manifest must be an insert list");
 
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+assert.equal(pkg.version, "0.3.0", "package version must match the DSH 0.1.7 release");
+assert.equal(pkg.peerDependencies?.["@deepseek-ai/dsh"], ">=0.1.7-rc.1 <0.2.0-0", "package must declare the DSH 0.1.7 peer range");
 assert.equal(pkg.dsh?.bundle?.patch, "./cordis.patch.yml", "package must declare dsh.bundle.patch");
 assert.equal(pkg.dsh?.client?.platform, "web", "package must declare dsh.client.platform web");
 assert.ok(pkg.dsh?.client?.inject?.includes("@deepseek-ai/dsh-api-session-controller"), "package must request the session-controller client graph");

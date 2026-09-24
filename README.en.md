@@ -46,15 +46,25 @@ The panel supports **search filtering**, mouse clicking, and <kbd>↑</kbd>/<kbd
 > History is read from the current session's full log (paged), strictly isolated per session; adjacent duplicate messages are collapsed automatically.
 
 ## 🚀 Install
-From NPM:
+From NPM (DSH `>=0.1.7-rc.1 <0.2.0`):
 ```
-dsh plugin --profile web add @loommii/dsh-input-history@latest
+dsh plugin --profile web add @loommii/dsh-input-history@0.3.0
 ```
 
 Or from GitHub:
 
 ```
 dsh plugin --profile web add github:loommii/dsh-input-history
+```
+
+### DSH compatibility
+
+`0.3.0` uses the public `conversation.input.for()` input API and supports DSH `0.1.7-rc.1` and newer `0.1.x` releases only.
+
+For a DSH version older than `0.1.7-rc.1`, install the last old-compatible tagged release (`v0.1.2`):
+
+```
+dsh plugin --profile web add @loommii/dsh-input-history@0.1.2
 ```
 
 Restart the profile after installing (`dsh web` / `dsh --profile <name>`).
@@ -75,7 +85,7 @@ Focus the chat composer of any session:
 
 ## 🏗️ Architecture
 
-The plugin is pure client-side UI: history is paged from the host's `remote.session` full session log (cache isolated per session), and recall is written back through the `conversation` input shell's `setDraft`.
+The plugin is pure client-side UI: history is paged from the host's `remote.session` full session log (cache isolated per session), and recall is written through the public `conversation.input.for(actx).setDraft()` API.
 
 <p align="center">
   <img src="assets/architecture.en.png" alt="dsh-input-history architecture">

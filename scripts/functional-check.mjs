@@ -99,7 +99,7 @@ const registeredComponents = new Map();
 const slotInjects = [];
 const registeredSources = [];
 const effects = [];
-const shellDraftWrites = [];
+const draftWrites = [];
 const slashPickWrites = [];
 const remoteRequests = [];
 const sessionsService = {
@@ -107,6 +107,9 @@ const sessionsService = {
     return sessionId === "subagent-session"
       ? { parentSessionId: "parent-session", childSessionId: sessionId, mode: "one-shot" }
       : undefined;
+  },
+  scope(sessionId) {
+    return { sessionId };
   },
   list: {
     getSnapshot() {
@@ -225,11 +228,9 @@ const ctx = {
     if (name === "conversation") {
       return {
         input: {
-          shell(id) {
+          for(actx) {
             return {
-              actions: {
-                setDraft(text) { shellDraftWrites.push({ sessionId: id, text }); },
-              },
+              setDraft(text) { draftWrites.push({ sessionId: actx.sessionId, text }); },
             };
           },
         },
@@ -272,6 +273,8 @@ assert.ok(!String(exportsObj).includes("popupSelect"), "no popupSelect registrat
 // Bare-enter "/history" opens our own panel (handled, not a command claim).
 const enterOutcome = await source.matchEnter({ sessionId: "s1" }, "/history", new AbortController().signal, { images: 0 });
 assert.equal(enterOutcome, "handled", "bare /history enter must be handled by our source");
+const attachmentOutcome = await source.matchEnter({ sessionId: "s-attachments" }, "/history", new AbortController().signal, { attachments: [{ id: "a1" }] });
+assert.equal(attachmentOutcome, "handled", "attachments must not block text-only history recall");
 
 // ---- REGRESSION: direct subagent sessions must be fail-closed ----
 {
@@ -318,7 +321,7 @@ assert.equal(enterOutcome, "handled", "bare /history enter must be handled by ou
       { id: "r2", label: "msg-oldest", detail: undefined }
     ]
   });
-  // The conversation mock records setDraft calls into shellDraftWrites.
+  // The public conversation input mock records setDraft calls.
   // Render with useInput returning a draft for parity.
   const tree = Panel({ sessionId: "s-click", useInput: () => ({ draft: "" }) });
   const foundRows = [];
@@ -332,13 +335,13 @@ assert.equal(enterOutcome, "handled", "bare /history enter must be handled by ou
     walk(node.children);
   })(tree);
   assert.equal(foundRows.length, 3, "must render one row per history item");
-  const shellWritesBefore = shellDraftWrites.length;
+  const draftWritesBefore = draftWrites.length;
   // Row 0 = newest, row 1 = middle, row 2 = oldest. Simulate mouse click.
   const ev = { preventDefault() {}, stopPropagation() {} };
   foundRows[0].props.onMouseDown(ev);
   foundRows[1].props.onMouseDown(ev);
   foundRows[2].props.onMouseDown(ev);
-  const writes = shellDraftWrites.slice(shellWritesBefore);
+  const writes = draftWrites.slice(draftWritesBefore);
   assert.equal(writes.length, 3, "three clicks must produce three draft writes");
   assert.equal(writes[0].text, "msg-newest", "click row 0 must recall row 0, not the last row");
   assert.equal(writes[1].text, "msg-middle", "click row 1 must recall row 1, not the last row");

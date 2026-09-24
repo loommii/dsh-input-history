@@ -46,15 +46,25 @@
 > 数据读取自当前会话的完整日志（含分页），按会话严格隔离；相邻重复消息自动折叠。
 
 ## 🚀 安装
-从 NPM 安装：
+从 NPM 安装（DSH `>=0.1.7-rc.1 <0.2.0`）：
 ```
-dsh plugin --profile web add @loommii/dsh-input-history@latest
+dsh plugin --profile web add @loommii/dsh-input-history@0.3.0
 ```
 
 或从 GitHub 安装：
 
 ```
 dsh plugin --profile web add github:loommii/dsh-input-history
+```
+
+### DSH 版本兼容
+
+`0.3.0` 使用 DSH 的公开 `conversation.input.for()` 输入接口，仅支持 DSH `0.1.7-rc.1` 及以上的 `0.1.x` 版本。
+
+如果你的 DSH 早于 `0.1.7-rc.1`，请安装旧兼容版本（当前仓库最后一个旧兼容 tag 为 `v0.1.2`）：
+
+```
+dsh plugin --profile web add @loommii/dsh-input-history@0.1.2
 ```
 
 安装后重启 profile（`dsh web` / `dsh --profile <name>`）。
@@ -76,7 +86,7 @@ dsh plugin --profile web remove @loommii/dsh-input-history
 
 ## 🏗️ 架构
 
-本插件是纯客户端 UI：历史从宿主 `remote.session` 完整会话日志分页读取（按会话隔离缓存），回填走 `conversation` 输入壳的 `setDraft`。
+本插件是纯客户端 UI：历史从宿主 `remote.session` 完整会话日志分页读取（按会话隔离缓存），回填通过公开的 `conversation.input.for(actx).setDraft()` 完成。
 
 <p align="center">
   <img src="assets/architecture.png" alt="dsh-input-history 架构图">
