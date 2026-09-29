@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/topics/dsh-plugin"><img alt="dsh-plugin" src="https://img.shields.io/badge/dsh-plugin-4d6bfe?style=flat&logo=deepseek&logoColor=white" /></a>
   <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-yellow.svg?style=flat" /></a>
-  <a href="https://www.npmjs.com/package/@deepseek-ai/dsh"><img alt="DSH 0.1.7-rc.1" src="https://img.shields.io/badge/dsh-0.1.7--rc.1-4d6bfe?style=flat" /></a>
+  <a href="https://www.npmjs.com/package/@deepseek-ai/dsh"><img alt="DSH >=0.1.7-rc.1" src="https://img.shields.io/badge/dsh-%3E%3D0.1.7--rc.1-4d6bfe?style=flat" /></a>
 </p>
 
 <p align="center">
@@ -46,9 +46,9 @@ The panel supports **search filtering**, mouse clicking, and <kbd>↑</kbd>/<kbd
 > History is read from the current session's full log (paged), strictly isolated per session; adjacent duplicate messages are collapsed automatically.
 
 ## 🚀 Install
-From NPM (DSH `>=0.1.7-rc.1 <0.2.0`):
+From NPM (DSH `>=0.1.7-rc.1`, no upper bound):
 ```
-dsh plugin --profile web add @loommii/dsh-input-history@0.3.0
+dsh plugin --profile web add @loommii/dsh-input-history@0.3.1
 ```
 
 Or from GitHub:
@@ -59,7 +59,7 @@ dsh plugin --profile web add github:loommii/dsh-input-history
 
 ### DSH compatibility
 
-`0.3.0` uses the public `conversation.input.for()` input API and supports DSH `0.1.7-rc.1` and newer `0.1.x` releases only.
+`0.3.1` uses the public `conversation.input.for()` input API and supports DSH `0.1.7-rc.1` and every newer release (including the `0.2.x` prereleases).
 
 For a DSH version older than `0.1.7-rc.1`, install the last old-compatible tagged release (`v0.1.2`):
 

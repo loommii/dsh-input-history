@@ -50,8 +50,9 @@ assert.ok(patch.includes(PKG_NAME), "patch manifest must reference the package n
 assert.ok(patch.includes("- insert:"), "patch manifest must be an insert list");
 
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
-assert.equal(pkg.version, "0.3.0", "package version must match the DSH 0.1.7 release");
-assert.equal(pkg.peerDependencies?.["@deepseek-ai/dsh"], ">=0.1.7-rc.1 <0.2.0-0", "package must declare the DSH 0.1.7 peer range");
+assert.equal(pkg.version, "0.3.1", "package version must match the published release");
+assert.equal(pkg.peerDependencies?.["@deepseek-ai/dsh"], ">=0.1.7-rc.1", "package must declare an open-ended DSH peer range");
+assert.equal(pkg.engines?.dsh, ">=0.1.7-rc.1", "engines must declare the same open-ended DSH range");
 assert.equal(pkg.dsh?.bundle?.patch, "./cordis.patch.yml", "package must declare dsh.bundle.patch");
 assert.equal(pkg.dsh?.client?.platform, "web", "package must declare dsh.client.platform web");
 assert.ok(pkg.dsh?.client?.inject?.includes("@deepseek-ai/dsh-api-session-controller"), "package must request the session-controller client graph");
