@@ -61,6 +61,23 @@ dsh plugin --profile web add github:loommii/dsh-input-history
 
 `0.3.1` uses the public `conversation.input.for()` input API and supports DSH `0.1.7-rc.1` and every newer release (including the `0.2.x` prereleases).
 
+| DSH version | Status | Notes |
+|---|---|---|
+| `0.2.1-rc.2` (current prerelease) | ✅ Audited, no code change needed | All 7 releases between `0.2.0-rc.2` and `0.2.1-rc.2` plus 16 plugin API packages were compared; none of the 10 contracts this plugin uses changed incompatibly |
+| `0.2.0-rc.2` | ✅ Verified | Development baseline of 0.3.1 |
+| `0.1.7-rc.1` ~ `0.2.0-rc.1` | ✅ Compatible | Same public input / session contracts |
+| `< 0.1.7-rc.1` | ❌ Incompatible | Use `0.1.2` instead |
+
+Plugin-facing changes from `0.2.0-rc.2` to `0.2.1-rc.2`, none of which affect this plugin:
+
+- Compatibility is now decided by `engines.dsh` when present (this package declares `>=0.1.7-rc.1`, which covers `0.2.1-rc.2`; verified)
+- The runtime invariant plugins and every package's `./invariant` export were removed (unused here)
+- The `conversation.session` injection face renamed `bindDraftMirror` → `bindDraftPersistence` (this plugin does not occupy that slot)
+- Command tokens became atomic chips and drafts are persisted as structured snapshots: `setDraft(text)` keeps its signature, with the semantics narrowed to "replace with plain text", matching history recall
+
+> After upgrading to `0.2.1-rc.2`, **reload the page**: the new release gates the client module graph per Host release, so an open page never hot-swaps to another release's plugins. Note that npm's `latest` still points at `0.2.0-rc.2` while `0.2.1-rc.2` sits under `next`; pin the version explicitly when installing.
+> These conclusions come from static comparison. After upgrading, confirm the three boundary cases with the regular regression checklist: `/history` token consumption after command chips, history reads under a non-owner peer, and first reads of sessions created on `0.2.0`.
+
 For a DSH version older than `0.1.7-rc.1`, install the last old-compatible tagged release (`v0.1.2`):
 
 ```
