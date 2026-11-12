@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Input History (@loommii/dsh-input-history)",
+    "description": "Recall messages sent in this session with ↑/↓ in the composer, or open a searchable panel with /history."
+  }
+}

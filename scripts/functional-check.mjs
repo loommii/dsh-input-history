@@ -101,7 +101,18 @@ const registeredSources = [];
 const effects = [];
 const draftWrites = [];
 const slashPickWrites = [];
+const insertWrites = [];
+const focusCalls = [];
+const draftBySession = new Map();
 const remoteRequests = [];
+/** The slot's session-scoped inputActions: the plugin prefers these over the resolver. */
+function inputActionsFor(sessionId) {
+  return {
+    setDraft(text) { draftWrites.push({ sessionId, text }); },
+    captureInsertion() { return { start: 0, end: 0, draftRev: 0 }; },
+    insertText(text, span) { insertWrites.push({ sessionId, text, span }); return true; },
+  };
+}
 const sessionsService = {
   subagentAddress(sessionId) {
     return sessionId === "subagent-session"
@@ -159,8 +170,9 @@ const ctx = {
       };
     }
     if (name === "remote.session") {
-      // Mock the host session-log pager: follow() yields an opening snapshot
-      // with the durable cursor + newest page; page() serves older cuts.
+      // Mock the host session-log pager: the first events() call omits
+      // throughSeq and returns the latest page + cursor; later calls pin that
+      // cursor and walk older with beforeSeq.
       const all = [
         // [seq, type, sourceKind, text, time]
         [1, "user/message", "user", "最早的一条输入(加载更早背后)", 500],
@@ -189,34 +201,38 @@ const ctx = {
         },
       }));
       return {
-        async *follow(request) {
+        async events(request) {
           remoteRequests.push(request);
           // Fail fast for the error-path test session (RPC failure).
           const sid = request.address && request.address.sessionId;
           if (sid === "fail-session") {
-            throw new Error("boom: follow failed (test)");
+            throw new Error("boom: events failed (test)");
           }
           const data = pickLog(sid);
           const max = request.maxMessages ?? 50;
-          const begin = Math.max(0, data.length - max);
-          yield {
-            type: "snapshot",
-            cursor: data.at(-1)[0],
-            records: toRecords(data.slice(begin)),
-            hasMore: begin > 0,
-          };
-        },
-        async page(request) {
-          remoteRequests.push(request);
-          if (request.beforeSeq === undefined) return { ok: false, error: new Error("page requires an open cursor") };
-          const data = pickLog(request.address && request.address.sessionId);
+          if (request.throughSeq === undefined) {
+            const begin = Math.max(0, data.length - max);
+            return {
+              ok: true,
+              value: {
+                cursor: data.length > 0 ? data.at(-1)[0] : 0,
+                records: toRecords(data.slice(begin)),
+                hasMore: begin > 0,
+              },
+            };
+          }
+          if (request.beforeSeq === undefined) {
+            return { ok: false, error: new Error("events requires an open cursor") };
+          }
           const idx = data.findIndex(([seq]) => seq === request.beforeSeq);
-          if (idx <= 0) return { ok: true, value: { records: [], hasMore: false } };
-          const max = request.maxMessages ?? 50;
+          if (idx <= 0) {
+            return { ok: true, value: { cursor: request.throughSeq, records: [], hasMore: false } };
+          }
           const begin = Math.max(0, idx - max);
           return {
             ok: true,
             value: {
+              cursor: request.throughSeq,
               records: toRecords(data.slice(begin, idx)),
               hasMore: begin > 0,
             },
@@ -231,6 +247,12 @@ const ctx = {
           for(actx) {
             return {
               setDraft(text) { draftWrites.push({ sessionId: actx.sessionId, text }); },
+              focus() { focusCalls.push(actx.sessionId); },
+              state: {
+                getSnapshot() {
+                  return { draft: draftBySession.get(actx.sessionId) || "", phase: "plain" };
+                },
+              },
             };
           },
         },
@@ -281,7 +303,7 @@ assert.equal(attachmentOutcome, "handled", "attachments must not block text-only
   const subagentCandidates = await source.candidates({ sessionId: "subagent-session" }, { query: "hist" });
   assert.deepEqual(subagentCandidates, [], "subagent sessions must not offer /history");
   const Panel = registeredComponents.get("input-history-panel");
-  assert.equal(Panel({ sessionId: "subagent-session", useInput: () => ({ draft: "" }) }), null, "subagent overlay must not render history");
+  assert.equal(Panel({ sessionId: "subagent-session", useInput: () => ({ draft: "", phase: "plain" }), inputActions: inputActionsFor("subagent-session") }), null, "subagent overlay must not render history");
   const subagentEnter = await source.matchEnter({ sessionId: "subagent-session" }, "/history", new AbortController().signal, { images: 0 });
   assert.equal(subagentEnter, undefined, "subagent bare /history must not be handled");
   const subagentPick = source.onPick({
@@ -323,7 +345,7 @@ assert.equal(attachmentOutcome, "handled", "attachments must not block text-only
   });
   // The public conversation input mock records setDraft calls.
   // Render with useInput returning a draft for parity.
-  const tree = Panel({ sessionId: "s-click", useInput: () => ({ draft: "" }) });
+  const tree = Panel({ sessionId: "s-click", useInput: () => ({ draft: "", phase: "plain" }), inputActions: inputActionsFor("s-click") });
   const foundRows = [];
   (function walk(node) {
     if (!node || typeof node !== "object") return;
@@ -348,6 +370,51 @@ assert.equal(attachmentOutcome, "handled", "attachments must not block text-only
   assert.equal(writes[2].text, "msg-oldest", "click row 2 must recall row 2");
   // Close the panel again to leave a clean store for later asserts.
   store.set({ open: false });
+}
+
+// ---- menu-pick insert mode must replace only the /history token ----
+{
+  const store = ihTest.HistoryStore;
+  const sid = "s-insert";
+  const sourceDraft = "prefix /history suffix";
+  draftBySession.set(sid, sourceDraft);
+  const pick = {
+    candidate: { name: "history" },
+    session: { sessionId: sid },
+    via: "menu",
+    span: { start: 7, end: 15, draftRev: 3 },
+  };
+  const outcome = source.onPick(pick);
+  assert.equal(outcome, undefined, "menu pick must leave the token until a row is chosen");
+  assert.equal(store.get().mode, "insert", "menu pick must open insert mode");
+  assert.equal(store.get().insertSpan, pick.span, "menu pick must retain the token span");
+  assert.equal(store.get().sourceDraft, sourceDraft, "menu pick must retain the source draft");
+  for (let tries = 0; tries < 100 && store.get().phase !== "ready"; tries++) await sleep(5);
+  assert.equal(store.get().phase, "ready", "insert panel must load rows");
+  const expected = store.get().rows[0].label;
+  const Panel = registeredComponents.get("input-history-panel");
+  const tree = Panel({
+    sessionId: sid,
+    useInput: () => ({ draft: sourceDraft, phase: "plain" }),
+    inputActions: inputActionsFor(sid),
+  });
+  const rows = [];
+  (function walk(node) {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) { node.forEach(walk); return; }
+    const p = node.props;
+    if (p && typeof p.onMouseDown === "function" && p.className && String(p.className).includes("dsh-ih-row")) rows.push(node);
+    walk(node.children);
+  })(tree);
+  assert.ok(rows.length > 0, "insert panel must render rows");
+  const before = insertWrites.length;
+  rows[0].props.onMouseDown({ preventDefault() {}, stopPropagation() {} });
+  const writes = insertWrites.slice(before);
+  assert.equal(writes.length, 1, "insert pick must use inputActions.insertText");
+  assert.equal(writes[0].span, pick.span, "insertText must receive the /history token span");
+  assert.equal(writes[0].text, expected, "insertText must receive the chosen row text");
+  assert.equal(store.get().open, false, "insert pick must close the panel");
+  draftBySession.delete(sid);
 }
 
 // ---- REGRESSION: a load for session B must NOT strand session A's callbacks ----
@@ -386,13 +453,13 @@ assert.equal(attachmentOutcome, "handled", "attachments must not block text-only
 }
 
 // ---- REGRESSION: a load failure must NOT masquerade as empty history ----
-// Old loaders caught every page/follow error and resolved with [] — the panel
+// Old loaders caught every page error and resolved with [] — the panel
 // then showed "暂无历史记录" for a session whose history merely failed to load.
 // Now failures surface as an error to callers (and an error phase in the UI).
 {
   const loader = ihTest.loadFullHistory;
   const loadMap = ihTest.HistoryLoad;
-  // Fail-session's follow() throws; the loader must report (rows=[], err) and
+  // Fail-session's events() throws; the loader must report (rows=[], err) and
   // still release its Map entry so later loads are not blocked.
   let errOut = null;
   let rowsOut = null;
@@ -413,7 +480,7 @@ assert.equal(attachmentOutcome, "handled", "attachments must not block text-only
   const Panel = registeredComponents.get("input-history-panel");
   const store = ihTest.HistoryStore;
   store.set({ open: true, index: 0, sessionId: "s-err", phase: "error", rows: [], savedDraft: "", mode: "replace", prefix: "", suffix: "" });
-  const tree = Panel({ sessionId: "s-err", useInput: () => ({ draft: "" }) });
+  const tree = Panel({ sessionId: "s-err", useInput: () => ({ draft: "", phase: "plain" }), inputActions: inputActionsFor("s-err") });
   let statusText = null;
   (function findStatus(node) {
     if (!node || typeof node !== "object") return;

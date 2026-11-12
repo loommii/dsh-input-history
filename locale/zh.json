@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "输入历史 (@loommii/dsh-input-history)",
+    "description": "在输入框按 ↑/↓ 翻查本会话发过的消息，或用 /history 打开可搜索的历史面板。"
+  }
+}

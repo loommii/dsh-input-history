@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/topics/dsh-plugin"><img alt="dsh-plugin" src="https://img.shields.io/badge/dsh-plugin-4d6bfe?style=flat&logo=deepseek&logoColor=white" /></a>
   <a href="https://opensource.org/licenses/MIT"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-yellow.svg?style=flat" /></a>
-  <a href="https://www.npmjs.com/package/@deepseek-ai/dsh"><img alt="DSH >=0.1.7-rc.1" src="https://img.shields.io/badge/dsh-%3E%3D0.1.7--rc.1-4d6bfe?style=flat" /></a>
+  <a href="https://www.npmjs.com/package/@deepseek-ai/dsh"><img alt="DSH >=0.2.2-rc.2" src="https://img.shields.io/badge/dsh-%3E%3D0.2.2--rc.2-4d6bfe?style=flat" /></a>
 </p>
 
 <p align="center">
@@ -46,9 +46,9 @@
 > 数据读取自当前会话的完整日志（含分页），按会话严格隔离；相邻重复消息自动折叠。
 
 ## 🚀 安装
-从 NPM 安装（DSH `>=0.1.7-rc.1`，无上限）：
+从 NPM 安装（DSH `>=0.2.2-rc.2`）：
 ```
-dsh plugin --profile web add @loommii/dsh-input-history@0.3.1
+dsh plugin --profile web add @loommii/dsh-input-history@0.4.0
 ```
 
 或从 GitHub 安装：
@@ -57,31 +57,30 @@ dsh plugin --profile web add @loommii/dsh-input-history@0.3.1
 dsh plugin --profile web add github:loommii/dsh-input-history
 ```
 
+> 安装后，插件列表显示为 **输入历史 (@loommii/dsh-input-history)**。
+
 ### DSH 版本兼容
 
-`0.3.1` 使用 DSH 的公开 `conversation.input.for()` 输入接口，支持 DSH `0.1.7-rc.1` 及以上的所有版本（含 `0.2.x` 预发布）。
+`0.4.0` 起只支持 DSH `>=0.2.2-rc.2`，直接使用当前公开的 `conversation.input.for()`、`remote.session.events`、`sessions`、`slots`（含 `inputActions`）和 `inputTriggers` 接口，不再保留旧版本兼容分支。
 
 | DSH 版本 | 状态 | 说明 |
 |---|---|---|
-| `0.2.1-rc.2`（当前最新预发布） | ✅ 已审计，无需改代码 | 逐版本比对 `0.2.0-rc.2 → 0.2.1-rc.2` 的 7 个发布与 16 个插件 API 包，本插件使用的 10 条契约无破坏性变更 |
-| `0.2.0-rc.2` | ✅ 已验证 | 0.3.1 的开发基线 |
-| `0.1.7-rc.1` ~ `0.2.0-rc.1` | ✅ 兼容 | 同一套公开输入 / 会话接口 |
-| `< 0.1.7-rc.1` | ❌ 不兼容 | 请改用 `0.1.2` |
+| `>=0.2.2-rc.2` | ✅ 支持 | 0.4.0 的最低版本；开发与验证基线为 `0.2.2-rc.2` |
+| `<0.2.2-rc.2` | ❌ 不支持 | 请继续使用 `0.3.1`（最后一个兼容 `0.1.7-rc.1+` 的版本） |
 
-`0.2.1-rc.2` 相对 `0.2.0-rc.2` 的插件面变更（均不影响本插件）：
+`0.4.0` 的破坏性变更：
 
-- 插件兼容性判定改为优先读 `engines.dsh`（本插件 `>=0.1.7-rc.1` 覆盖 `0.2.1-rc.2`，实测通过）
-- 移除运行时 invariant 插件及各包 `./invariant` 导出（本插件不使用）
-- `conversation.session` 注入面 `bindDraftMirror` → `bindDraftPersistence`（本插件不占用该槽位）
-- 命令词元 chip 化与草稿结构化持久化：`setDraft(text)` 签名不变，语义收敛为「替换为纯文本」，与历史回填行为一致
+- 最低 DSH 版本从 `0.1.7-rc.1` 提升到 `0.2.2-rc.2`
+- 移除旧版本兼容代码：未使用的裸 `remote` 服务注入、旧服务形状探测、旧主题 token 回退
+- 改用 `remote.session.events`（`page` 已弃用）以及槽位 `inputActions` / `captureInsertion()` / `insertText()`，移除手写 DOM 光标探测和 `RuntimeDraft` 镜像
+- 功能不变；菜单插入路径会保留 `/history` 词元直到选中历史行，选中后只替换该词元，保留周围内容与撤销历史
 
-> 升级 DSH 到 `0.2.1-rc.2` 后请**整页刷新** GUI —— 新版本对跨 release 的客户端模块图做了门控，已打开的页面不会热切换到新 release 的插件。另外 npm 的 `latest` 仍指向 `0.2.0-rc.2`，`0.2.1-rc.2` 位于 `next` 标签下，升级时请显式指定版本。
-> 上述兼容结论来自静态比对，建议升级后按标准回归用例确认三个边界场景：命令 chip 化后 `/history` 的词元消费、非 owner peer 下的历史读取、`0.2.0` 时代旧会话的首读。
+> npm 的 `latest` 当前指向 `0.2.2-rc.1`，`0.2.2-rc.2` 位于 `next` 标签下；安装 DSH 时请显式指定版本。升级 DSH 后请整页刷新 GUI。
 
-如果你的 DSH 早于 `0.1.7-rc.1`，请安装旧兼容版本（当前仓库最后一个旧兼容 tag 为 `v0.1.2`）：
+如果你的 DSH 早于 `0.2.2-rc.2`，请继续使用 `0.3.1`：
 
 ```
-dsh plugin --profile web add @loommii/dsh-input-history@0.1.2
+dsh plugin --profile web add @loommii/dsh-input-history@0.3.1
 ```
 
 安装后重启 profile（`dsh web` / `dsh --profile <name>`）。
@@ -103,7 +102,7 @@ dsh plugin --profile web remove @loommii/dsh-input-history
 
 ## 🏗️ 架构
 
-本插件是纯客户端 UI：历史从宿主 `remote.session` 完整会话日志分页读取（按会话隔离缓存），回填通过公开的 `conversation.input.for(actx).setDraft()` 完成。
+本插件是纯客户端 UI：历史通过 `remote.session.events` 从宿主完整会话日志分页读取（按会话隔离缓存），回填优先使用槽位 `inputActions`（`setDraft` / `insertText`），源回调兜底使用 `conversation.input.for(actx)`。
 
 <p align="center">
   <img src="assets/architecture.png" alt="dsh-input-history 架构图">

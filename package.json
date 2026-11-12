@@ -1,7 +1,8 @@
 {
   "name": "@loommii/dsh-input-history",
-  "version": "0.3.1",
-  "description": "Arrow-key input history for the DeepSeek Harness Web GUI: press Up/Down at the composer boundary to recall previously sent messages, with a floating history dropdown and a /history command that opens the same panel from the slash menu. Built for the Lexical contenteditable composer (dsh >= 0.1.7-rc.1).",
+  "version": "0.4.0",
+  "description": "Arrow-key input history for the DeepSeek Harness Web GUI: press Up/Down at the composer boundary to recall previously sent messages, with a floating history dropdown and a /history command that opens the same panel from the slash menu. Built for the Lexical contenteditable composer and the public DSH input/session APIs (dsh >= 0.2.2-rc.2).",
+  "icon": "icon.svg",
   "author": "loommii",
   "keywords": [
     "dsh",
@@ -23,12 +24,15 @@
     ".": "./lib/index.js",
     "./client": "./lib/client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
   },
   "files": [
     "lib/index.js",
     "lib/client.js",
     "cordis.patch.yml",
+    "icon.svg",
+    "locale/*.json",
     "README.md",
     "README.en.md",
     "LICENSE"
@@ -53,9 +57,9 @@
   },
   "engines": {
     "node": ">=18",
-    "dsh": ">=0.1.7-rc.1"
+    "dsh": ">=0.2.2-rc.2"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh": ">=0.1.7-rc.1"
+    "@deepseek-ai/dsh": ">=0.2.2-rc.2"
   }
 }
