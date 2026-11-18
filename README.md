@@ -12,7 +12,7 @@
 
 <p align="center">
   <strong>终端式输入历史，用 <kbd>↑</kbd>/<kbd>↓</kbd> 翻查本会话发过的消息。</strong><br>
-  纯客户端插件，无宿主侧改动 — <code>/history</code> 指令提供可搜索的历史面板。
+  纯客户端插件，无宿主侧改动，同时适用于 DSH Web 与桌面客户端 — <code>/history</code> 指令提供可搜索的历史面板。
 </p>
 
 ## 🎬 演示

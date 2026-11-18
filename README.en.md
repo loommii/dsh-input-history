@@ -12,7 +12,7 @@
 
 <p align="center">
   <strong>Terminal-style input history: press <kbd>↑</kbd>/<kbd>↓</kbd> to browse messages sent in the current session.</strong><br>
-  Pure client-side plugin, no host changes — the <code>/history</code> command opens a searchable history panel.
+  Pure client-side plugin, no host changes, works in both DSH Web and the DSH desktop client — the <code>/history</code> command opens a searchable history panel.
 </p>
 
 ## 🎬 Demo
