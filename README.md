@@ -66,7 +66,7 @@ dsh plugin --profile web add github:loommii/dsh-input-history
 | DSH 版本 | 状态 | 说明 |
 |---|---|---|
 | `>=0.2.2-rc.2` | ✅ 支持 | 0.4.0 的最低版本；开发与验证基线为 `0.2.2-rc.2` |
-| `0.2.2-rc.3` | ✅ 支持 | 最新候选版（npm `next` 标签）；已按发布产物逐包核对，本插件用到的接口与 `0.2.2-rc.2` 完全一致；GUI 验证基线仍是 `0.2.2-rc.2` |
+| `0.2.2-rc.3` ~ `0.2.2-rc.5` | ✅ 支持 | 已按发布产物逐包核对（含 `0.2.2-rc.4` / `0.2.2-rc.5`，当前 npm `next` 为 rc.5）：本插件用到的接口与 `0.2.2-rc.2` 完全一致；GUI 验证基线仍是 `0.2.2-rc.2` |
 | `<0.2.2-rc.2` | ❌ 不支持 | 请继续使用 `0.3.1`（最后一个兼容 `0.1.7-rc.1+` 的版本） |
 
 `0.4.0` 的破坏性变更：
@@ -76,7 +76,7 @@ dsh plugin --profile web add github:loommii/dsh-input-history
 - 改用 `remote.session.events`（`page` 已弃用）以及槽位 `inputActions` / `captureInsertion()` / `insertText()`，移除手写 DOM 光标探测和 `RuntimeDraft` 镜像
 - 功能不变；菜单插入路径会保留 `/history` 词元直到选中历史行，选中后只替换该词元，保留周围内容与撤销历史
 
-> npm 的 `latest` 当前指向 `0.2.2-rc.1`，`next` 指向 `0.2.2-rc.3`（`0.2.2-rc.2` 已不在任何标签上，只能显式写版本号）；安装 DSH 时请显式指定版本。升级 DSH 后请整页刷新 GUI。
+> npm 的 `latest` 当前指向 `0.2.2-rc.1`，`next` 指向 `0.2.2-rc.5`（`0.2.2-rc.2` 已不在任何标签上，只能显式写版本号）；安装 DSH 时请显式指定版本。升级 DSH 后请整页刷新 GUI。
 
 如果你的 DSH 早于 `0.2.2-rc.2`，请继续使用 `0.3.1`：
 

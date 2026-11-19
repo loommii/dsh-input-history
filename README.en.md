@@ -66,7 +66,7 @@ Starting with `0.4.0`, this plugin supports only DSH `>=0.2.2-rc.2`. It uses the
 | DSH version | Status | Notes |
 |---|---|---|
 | `>=0.2.2-rc.2` | ✅ Supported | Minimum for 0.4.0; developed and verified against `0.2.2-rc.2` |
-| `0.2.2-rc.3` | ✅ Supported | Latest release candidate (npm `next` tag); checked package by package against its published artifacts — the APIs this plugin uses are identical to `0.2.2-rc.2`; the GUI verification baseline is still `0.2.2-rc.2` |
+| `0.2.2-rc.3` ~ `0.2.2-rc.5` | ✅ Supported | Checked package by package against published artifacts (including `0.2.2-rc.4` / `0.2.2-rc.5`, the current npm `next`): the APIs this plugin uses are identical to `0.2.2-rc.2`; the GUI verification baseline is still `0.2.2-rc.2` |
 | `<0.2.2-rc.2` | ❌ Unsupported | Keep using `0.3.1`, the last release compatible with `0.1.7-rc.1+` |
 
 Breaking changes in `0.4.0`:
@@ -76,7 +76,7 @@ Breaking changes in `0.4.0`:
 - Uses `remote.session.events` (`page` is deprecated) plus the slot's `inputActions` / `captureInsertion()` / `insertText()`, removing the DOM caret walker and the `RuntimeDraft` mirror
 - Functionality is unchanged; the menu-pick path keeps the `/history` token until a history row is chosen, then replaces only that token while preserving surrounding content and undo history
 
-> npm's `latest` currently points at `0.2.2-rc.1` and `next` at `0.2.2-rc.3` (`0.2.2-rc.2` no longer sits under any tag, so spell the version out); pin the version explicitly when installing DSH. Reload the page after upgrading DSH.
+> npm's `latest` currently points at `0.2.2-rc.1` and `next` at `0.2.2-rc.5` (`0.2.2-rc.2` no longer sits under any tag, so spell the version out); pin the version explicitly when installing DSH. Reload the page after upgrading DSH.
 
 For a DSH version older than `0.2.2-rc.2`, keep using `0.3.1`:
 
