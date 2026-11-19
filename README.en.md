@@ -61,12 +61,13 @@ dsh plugin --profile web add github:loommii/dsh-input-history
 
 ### DSH compatibility
 
-Starting with `0.4.0`, this plugin supports only DSH `>=0.2.2-rc.2`. It uses the current public `conversation.input.for()`, `remote.session.events`, `sessions`, `slots` (including `inputActions`), and `inputTriggers` APIs and keeps no compatibility branches for older releases.
+Starting with `0.4.0`, this plugin supports only DSH `>=0.2.2-rc.2` (the latest release candidate `0.2.2-rc.5` is covered). It uses the current public `conversation.input.for()`, `remote.session.events`, `sessions`, `slots` (including `inputActions`), and `inputTriggers` APIs and keeps no compatibility branches for older releases.
 
 | DSH version | Status | Notes |
 |---|---|---|
 | `>=0.2.2-rc.2` | ✅ Supported | Minimum for 0.4.0; developed and verified against `0.2.2-rc.2` |
-| `0.2.2-rc.3` ~ `0.2.2-rc.5` | ✅ Supported | Checked package by package against published artifacts (including `0.2.2-rc.4` / `0.2.2-rc.5`, the current npm `next`): the APIs this plugin uses are identical to `0.2.2-rc.2`; the GUI verification baseline is still `0.2.2-rc.2` |
+| `0.2.2-rc.3` / `0.2.2-rc.4` | ✅ Supported | Checked package by package against published artifacts: the APIs this plugin uses are identical to `0.2.2-rc.2` |
+| `0.2.2-rc.5` | ✅ Supported | The current release candidate (npm `next` tag, the version the desktop client upgrade notice points to): checked package by package against published artifacts — the APIs this plugin uses are identical to `0.2.2-rc.2` and no changes are needed; the GUI verification baseline is still `0.2.2-rc.2` |
 | `<0.2.2-rc.2` | ❌ Unsupported | Keep using `0.3.1`, the last release compatible with `0.1.7-rc.1+` |
 
 Breaking changes in `0.4.0`:

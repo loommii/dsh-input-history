@@ -61,12 +61,13 @@ dsh plugin --profile web add github:loommii/dsh-input-history
 
 ### DSH 版本兼容
 
-`0.4.0` 起只支持 DSH `>=0.2.2-rc.2`，直接使用当前公开的 `conversation.input.for()`、`remote.session.events`、`sessions`、`slots`（含 `inputActions`）和 `inputTriggers` 接口，不再保留旧版本兼容分支。
+`0.4.0` 起只支持 DSH `>=0.2.2-rc.2`（已覆盖最新候选版 `0.2.2-rc.5`），直接使用当前公开的 `conversation.input.for()`、`remote.session.events`、`sessions`、`slots`（含 `inputActions`）和 `inputTriggers` 接口，不再保留旧版本兼容分支。
 
 | DSH 版本 | 状态 | 说明 |
 |---|---|---|
 | `>=0.2.2-rc.2` | ✅ 支持 | 0.4.0 的最低版本；开发与验证基线为 `0.2.2-rc.2` |
-| `0.2.2-rc.3` ~ `0.2.2-rc.5` | ✅ 支持 | 已按发布产物逐包核对（含 `0.2.2-rc.4` / `0.2.2-rc.5`，当前 npm `next` 为 rc.5）：本插件用到的接口与 `0.2.2-rc.2` 完全一致；GUI 验证基线仍是 `0.2.2-rc.2` |
+| `0.2.2-rc.3` / `0.2.2-rc.4` | ✅ 支持 | 已按发布产物逐包核对：本插件用到的接口与 `0.2.2-rc.2` 完全一致 |
+| `0.2.2-rc.5` | ✅ 支持 | 当前最新候选版（npm `next` 标签，桌面客户端升级通知指向的版本）：已按发布产物逐包核对，本插件用到的接口与 `0.2.2-rc.2` 完全一致，无需任何改动；GUI 验证基线仍是 `0.2.2-rc.2` |
 | `<0.2.2-rc.2` | ❌ 不支持 | 请继续使用 `0.3.1`（最后一个兼容 `0.1.7-rc.1+` 的版本） |
 
 `0.4.0` 的破坏性变更：
